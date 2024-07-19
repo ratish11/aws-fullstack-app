@@ -1,0 +1,5 @@
+https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-typescript.html
+
+https://saturncloud.io/blog/how-to-upload-a-file-to-amazon-s3-with-nodejs/
+
+https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/lambda/command/CreateFunctionCommand/
