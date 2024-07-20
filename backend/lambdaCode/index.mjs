@@ -1,16 +1,19 @@
-import { DynamoDBClient, PutItemCommand  } from "@aws-sdk/client-dynamodb";
+import { DynamoDB, PutItemCommand } from "@aws-sdk/client-dynamodb";
+// import { DynamoDBClient, PutItemCommand  } from "@aws-sdk/client-dynamodb";
 import { nanoid } from "nanoid";
-// import Busboy from "busboy";
 
-const client = new DynamoDBClient({region: "us-east-2"});
+const client = new DynamoDB({region: "us-east-2"});
 const dynamoDBTable = "fovus-content-idx-table";
 
 export const handler = async (event) => {
     // console.info('Received event:', JSON.stringify(event, null, 2));
     const id = nanoid();
-    const requestBody = JSON.parse(event.body);
+    // const decodedBody = Buffer.from(event.body, 'base64').toString('utf-8');
+    // console.info(decodedBody);
+    const requestBody = JSON.parse(event.body)
+    
     const { textInput, fileName } = requestBody;
-    console.info(id, textInput, fileName, typeof requestBody);
+    console.info(id, textInput, fileName, typeof requestBody, requestBody);
     const params = {
         TableName: dynamoDBTable,
         Item: {
@@ -20,8 +23,11 @@ export const handler = async (event) => {
         },
       };
     try {
-    //   await dynamoDB.put(params).promise();
-      await client.send(new PutItemCommand(params));
+      const result = await client.send(new PutItemCommand(params));
+      console.info("dynamo put result", result);
+      if(!result.statusCode==="200") {
+        throw result;
+      }
       const response = {
         statusCode: 200,
         body: JSON.stringify({ message: 'Item successfully written to DynamoDB'}),

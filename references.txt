@@ -1,5 +1,15 @@
 https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-typescript.html
 
+https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/introduction/
+
 https://saturncloud.io/blog/how-to-upload-a-file-to-amazon-s3-with-nodejs/
 
 https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/lambda/command/CreateFunctionCommand/
+
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.Tutorial.html
+
+
+https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.Tutorial2.html
+
+
+https://docs.aws.amazon.com/lambda/latest/dg/with-ddb-example.html
