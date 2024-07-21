@@ -14,3 +14,11 @@ Individual ReadMe docs are included inside frontend and backend dirs.
 References included in the `reference.txt`, and many more is missing.
 
 Some Screenshots of the logs on lambda, dynamodb screenshot are included in the `ScreenShots` dir
+
+To start the frontend do the following:
+`cd frontend`
+`npm start`
+
+To start the backend do the following:
+`cd backend`
+`node index.js`
