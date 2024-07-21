@@ -1,4 +1,4 @@
-const { DynamoDBClient, CreateTableCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, CreateTableCommand, UpdateTableCommand } = require("@aws-sdk/client-dynamodb");
 const { region, dynamoDBTable } = require('./config');
 
 // Configure the DynamoDB client
@@ -10,11 +10,11 @@ async function createDynamoDBTable(tableName) {
     TableName: tableName,
     KeySchema: [
       { AttributeName: "id", KeyType: "HASH" }, // Partition key
-      { AttributeName: "input_file_path", KeyType: "RANGE" } // Sort key
+      // { AttributeName: "input_file_path", KeyType: "RANGE" } // Sort key
     ],
     AttributeDefinitions: [
       { AttributeName: "id", AttributeType: "S" },
-      { AttributeName: "input_file_path", AttributeType: "S" }
+      // { AttributeName: "input_file_path", AttributeType: "S" }
     ],
     ProvisionedThroughput: {
       ReadCapacityUnits: 5,
@@ -32,8 +32,25 @@ async function createDynamoDBTable(tableName) {
   }
 }
 
+async function addDynamoDBStream(tableName) {
+  try {
+    const updateTableParams = {
+      TableName: dynamoDBTable,
+      StreamSpecification: {
+        StreamEnabled: true,
+        StreamViewType: "NEW_IMAGE"
+      }
+    };
+    const command = new UpdateTableCommand(updateTableParams);
+    const response = await dynamodbClient.send(command);
+    console.log("Table updated successfully:", response);
+  } catch (error) {
+    console.error("Error updating table:", error);
+  }
+}
+
 // Usage
 const tableName = dynamoDBTable;
-createDynamoDBTable(tableName)
-  .then(() => console.log("Table creation initiated"))
-  .catch(err => console.error("Failed to initiate table creation:", err));
+createDynamoDBTable(tableName); //table already created
+await new Promise(resolve => setTimeout(resolve, 10000));
+addDynamoDBStream(tableName);

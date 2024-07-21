@@ -1,5 +1,6 @@
 const { startUpPort, region, s3BucketName, apiUrl } = require("./config");
 const express = require("express");
+const cors = require('cors');
 const multer = require("multer");
 const { memoryStorage } = require("multer");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
@@ -7,6 +8,7 @@ const FormData = require('form-data');
 // const  { readFile } = require("fs/promises");
 const fetch = require('node-fetch');
 const app = express();
+app.use(cors());
 const port = startUpPort;
 
 
@@ -16,18 +18,11 @@ const port = startUpPort;
 
   async function registerToDynammo(apiUrl, inputText, bucketName, key) {
 
-    // const formdata = new FormData();
-    // formdata.append("textInput", inputText);
-    // formdata.append("fileName", `${bucketName}/${key}`);
-    // const requestOptions = {
-    //   method: "POST",
-    //   body: formdata,
-    //   redirect: "follow"
-    // };
     const body = {
       "textInput" : inputText,
-      "fileName" : `${bucketName}/${key}`
+      "fileName" : `s3://${bucketName}/${key}`
     }
+    console.info(`Body sent to Lambda ${JSON.stringify(body)}`);
     try {
       const resp = await fetch(apiUrl, {
         method: 'POST',
@@ -75,10 +70,15 @@ const port = startUpPort;
   }
   
   app.post('/uploadFile', upload.single('file'), async (req, res) => { 
+    
     const fileBuffer = req.file.buffer;
-    const fileName = req.file.originalname;
-    const textInput = req.body.textInput;
+    const fileName = req.body.filename;
+    const textInput = req.body.inputText;
     const mimetype = req.file.mimetype;
+    // console.info(`text before dynamo write : ${textInput}  body text ${JSON.stringify(req.body)}`);
+    // if(!textInput) {
+    //   return res.status(400).json({ error: 'textInput is empty' });
+    // }
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
@@ -86,6 +86,7 @@ const port = startUpPort;
     const key = `${fileName}.InputFile`;
     await uploadFileToS3(s3BucketName, key, fileBuffer, mimetype);
     //now call api gateway to write to DynammoDB it needs inputText and s3BucketName/key
+    
     const dyresp = await registerToDynammo(apiUrl, textInput, s3BucketName, key);
     if(dyresp!==200) {
       return res.status(500).json({ error: 'Error Failed to write to DynamoDB' });
