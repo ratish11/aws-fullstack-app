@@ -51,5 +51,6 @@ async function addDynamoDBStream(tableName) {
 
 // Usage
 const tableName = dynamoDBTable;
-// createDynamoDBTable(tableName); //table already created
+createDynamoDBTable(tableName); //table already created
+await new Promise(resolve => setTimeout(resolve, 10000));
 addDynamoDBStream(tableName);

@@ -4,3 +4,11 @@ Have to hardcode some variables in Lambda code since they are standalone codes a
 
 NanoID package is bound with node_modules for LambdaBridge since it is not available on Lambda's inbuilt layers.
 Rest packages have been imported into env from the layers of lambda as per the documents for v3 sdk
+
+Note: I am trying to upgrade the application a bit as mentioned in the `Bonus` Section of the Coding Challenge
+
+In this project I am using AWS Access key to make api service calls, this can be easily done through AWS IAM Role as a best practice and attach the role to appropriate hosting frontend and backend serices.
+
+Individual ReadMe docs are included inside frontend and backend dirs. 
+
+References included in the `reference.txt`, and many more is missing.
