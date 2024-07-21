@@ -10,11 +10,11 @@ async function createDynamoDBTable(tableName) {
     TableName: tableName,
     KeySchema: [
       { AttributeName: "id", KeyType: "HASH" }, // Partition key
-      { AttributeName: "input_file_path", KeyType: "RANGE" } // Sort key
+      // { AttributeName: "input_file_path", KeyType: "RANGE" } // Sort key
     ],
     AttributeDefinitions: [
       { AttributeName: "id", AttributeType: "S" },
-      { AttributeName: "input_file_path", AttributeType: "S" }
+      // { AttributeName: "input_file_path", AttributeType: "S" }
     ],
     ProvisionedThroughput: {
       ReadCapacityUnits: 5,
@@ -51,5 +51,5 @@ async function addDynamoDBStream(tableName) {
 
 // Usage
 const tableName = dynamoDBTable;
-createDynamoDBTable(tableName); //table already created
+// createDynamoDBTable(tableName); //table already created
 addDynamoDBStream(tableName);

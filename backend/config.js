@@ -18,7 +18,7 @@ const config = {
     s3BucketName: "fovus-content-storage",
     apiUrl: "https://qn71wg4i4c.execute-api.us-east-2.amazonaws.com/upload",
     dynamoDBTable : "fovus-content-idx-table",
-    dynamoDBStreamARN: "arn:aws:dynamodb:us-east-2:490489140525:table/fovus-content-idx-table/stream/2024-07-19T16:09:43.248",
+    dynamoDBStreamARN: "arn:aws:dynamodb:us-east-2:490489140525:table/fovus-content-idx-table/stream/2024-07-20T21:05:30.234",
     dyanomoLambdaStreamPolicy: "dyanomoLambdaStreamPolicy",
     trustPolicyPath : "configs/trust-policy.json",
     rolePolicyPath : "configs/role-policy.json",

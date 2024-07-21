@@ -12,23 +12,26 @@ import {
     instanceProfile,
     dynamoDBTable,
     s3BucketID
-} from './config.js';
+} from './config.mjs';
 
 const ec2Client = new EC2Client({ region });
 const ssmClient = new SSMClient({ region });
 const dynamoDBClient = new DynamoDB({region});
 
 export const handler = async (event) => {
-    console.info("DBClient ", dynamoDBClient)
+    // console.info("DBClient ", dynamoDBClient)
     console.info('Received event:', JSON.stringify(event, null, 2), typeof event);
+    // console.info("Parsed = ", event.Records[0].dynamodb.NewImage);
     try {
-        const data = event.Records.dynamodb.NewImage;
-        const id =  data.id;
-        const textInput = data.input_text;
-        const inputFile = data.input_file_path;
+        const data = event.Records[0].dynamodb.NewImage;
+        const id =  data.id.S;
+        const textInput = data.input_text.S;
+        const inputFile = data.input_file_path.S;
+        console.info("processing the received data from DB", id, textInput, inputFile);
 
         // create ec2 instance in default VPC
         const createInstancesCommand = new RunInstancesCommand({
+          
             ImageId: imageId, 
             InstanceType: instanceType, 
             MinCount: 1,
@@ -55,29 +58,34 @@ export const handler = async (event) => {
           if (instanceState === 'running') break;
           await new Promise(resolve => setTimeout(resolve, 5000)); 
         }
-
+        await new Promise(resolve => setTimeout(resolve, 60000));
+        
+        //send command to instance via SSM client
+        // const instanceId = "i-09ad65d44b051d78d";
         const runEC2Script = new SendCommandCommand({
             InstanceIds: [instanceId],
             DocumentName: 'AWS-RunShellScript',
             Parameters: {
-              commands: [`aws s3 cp s3://${s3BucketID}/vm_script.py vm_script.py && python vm_script.py && python --version`]
+              commands: [`aws s3 cp s3://${s3BucketID}/vm_script.py vm_script.py && sudo yum install python3-pip -y && pip install boto3 && python3 vm_script.py ${id} ${dynamoDBTable} ${s3BucketID} ${region}`]  
             }
         });
         const runScript = await ssmClient.send(runEC2Script);
         const commandId = runScript.Command.CommandId;
-        console.log(`Sent command to EC2 instance: ${runScript}`);
-
-        let commandStatus = 'Pending';
-        while (commandStatus === 'Pending' || commandStatus === 'InProgress') {
-          const getCommandInvocationCommand = new GetCommandInvocationCommand({
+        const checkRunCommandStatus = new GetCommandInvocationCommand({
             CommandId: commandId,
             InstanceId: instanceId,
           });
-          const commandInvocationResponse = await ssmClient.send(getCommandInvocationCommand);
-          commandStatus = commandInvocationResponse.Status;
-          console.log(`Command completed with status: ${commandStatus}`);
+        // console.log("invoking for checking the command status: ", JSON.stringify(runScript, null, 2)  ,JSON.stringify(checkRunCommandStatus, null, 2));
+        let commandStatus = 'Pending';
+        while (commandStatus === 'Pending' || commandStatus === 'InProgress') {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          const runCommandResponse = await ssmClient.send(checkRunCommandStatus);
+          console.log("Command invocation log: ",JSON.stringify(runCommandResponse.StandardErrorContent, null, 2), " \n", runCommandResponse.Status);
+          console.log("invocation stdopt: ", JSON.stringify(runCommandResponse.StandardOutputContent, null, 2),);
+          commandStatus = runCommandResponse.Status;
+          console.log(`Command status: ${commandStatus}`);
           if (commandStatus === 'Success' || commandStatus === 'Failed' || commandStatus === 'TimedOut') break;
-          await new Promise(resolve => setTimeout(resolve, 5000)); 
+           
         }
 
         const terminateInstancesCommand = new TerminateInstancesCommand({ InstanceIds: [instanceId] });
