@@ -12,3 +12,5 @@ In this project I am using AWS Access key to make api service calls, this can be
 Individual ReadMe docs are included inside frontend and backend dirs. 
 
 References included in the `reference.txt`, and many more is missing.
+
+Some Screenshots of the logs on lambda, dynamodb screenshot are included in the `ScreenShots` dir
